@@ -1,9 +1,9 @@
 import { urlConstants } from "../constants";
 import { networkInstance } from "./networkInstances";
 
-export const clockIn = async (id:string) => {
+export const clock_Out = async (id:string) => {
     try {
-        const url = `${urlConstants?.attendance}/${id}/${urlConstants?.clockIn}`
+        const url = `${urlConstants?.attendance}/${id}/${urlConstants?.clockOut}`
         const response = await networkInstance.post(url);
         return { success : true,}
     } catch(error : any) {

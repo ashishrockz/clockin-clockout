@@ -28,7 +28,6 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-
   if (!context) {
     throw new Error("useApiPaths must be used within an ApiProvider");
   }

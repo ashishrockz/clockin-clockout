@@ -3,11 +3,11 @@ import { Delete } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { login } from "../data-providers/login-service";
 import { LoginErrors } from "../models/error-constants";
+import { useNavigate } from "react-router-dom";
 
 const EmployeeLogin = () => {
-
-
   const { setUser} = useAuth();
+  const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState('');
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -18,6 +18,7 @@ const EmployeeLogin = () => {
       const response = await login(pin);
       if(response?.success && response?.userData){
         setUser(response?.userData);
+        navigate('/clock-in');
       } else {
         //TODO ERROR HANDLING
         setOpenSnackbar(true);
@@ -36,12 +37,13 @@ const EmployeeLogin = () => {
     }
 
 
-  const handleNumberClick = (number: string) => {
+  const handleNumberClick = (loginPin: string) => {
     if (pin.length < 4) {
-      setPin((prev) => prev + number);
+      setPin((prev) => prev + loginPin);
+    } 
+    if(pin.length === 4) {
+      handelSubmit();
     }
-    console.log(pin);
-    
    };
 
   const handleClear = () => {

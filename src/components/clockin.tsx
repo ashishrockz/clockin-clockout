@@ -1,21 +1,24 @@
 import { useEffect, useState } from "react";
-import DateTime from "./datetime";
+import DateTime, { getFormattedTime } from "./datetime";
 import { useAuth } from "../context/AuthContext";
 import Snackbar from '@mui/material/Snackbar';
 import { useNavigate } from "react-router-dom";
 import { logout } from "../data-providers/login-service";
-import { ClockInErrors, DisplayingClockInError } from "../models/error-constants";
+import { ClockInErrors, DisplayingClockInError, DisplayingUserDetailsErrors, UserDetailsErrors } from "../models/error-constants";
 import React from "react";
 import Button from '@mui/material/Button';
-import { clockIn } from "../data-providers/clockin";
+import { clockIn, getUserClockDetails } from "../data-providers/clockin";
+import { EmployeeAttendance } from "../models/clockin-models";
+import { userStatus } from "../constants";
 
 const ClockIn: React.FC = () => {
     const [clockInResponse, setClockInResponse] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
     const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
     const navigate = useNavigate();
-
     const { user } = useAuth();
+    let userObject: EmployeeAttendance | undefined;
+
 
     useEffect(() => {
         if (snackbarOpen) {
@@ -25,9 +28,32 @@ const ClockIn: React.FC = () => {
         }
     }, [snackbarOpen])
 
-    // useEffect(()=>{
+    const getClockInDetails = async () =>{
+        if((user?.userId)){
+            const response = await getUserClockDetails(user?.userId);
+            if(response?.success){
+                userObject = response.userData;
+            }
+            else{
+                switch(response.message){
+                    case UserDetailsErrors?.ERROR_EMPLOYEE_ATTENDANCE_DETAILS_NOT_FOUND:
+                        setError(DisplayingUserDetailsErrors?.ERROR_EMPLOYEE_ATTENDANCE_DETAILS_NOT_FOUND);
+                        break;
+                    case UserDetailsErrors?.ERROR_INVALID_EMPLOYEE:
+                        setError(DisplayingClockInError?.ERROR_INVALID_EMPLOYEE);
+                        break;
+                    default:
+                        setError(DisplayingClockInError?.SOMETHING_WENT_WRONG);
+                        break;
+                }
+                setSnackbarOpen(true);
+            }
+        }
+    }
 
-    // },[])
+    useEffect(()=>{
+        getClockInDetails();
+    },[])
 
     const handleClockIn = async () => {
         if (!user?.userId) {
@@ -64,13 +90,12 @@ const ClockIn: React.FC = () => {
             navigate("/login")
         }
     }
-
-    if (clockInResponse) {
+    if (userObject?.status == userStatus.clockedIn) {
         return (
             <div className="bg-gray-900 text-white h-screen p-5">
                 <DateTime />
                 <div className="mt-15 flex flex-col justify-center items-center">
-                    <h2 className="font-semibold text-xl mt-3 mb-3">Clocked-in successfully at 2:27</h2>
+                    <h2 className="font-semibold text-xl mt-3 mb-3">Clocked-in successfully at {getFormattedTime(new Date(userObject.clockIn))}</h2>
                     <h5 className="font-semibold text-lg mt-3 mb-3">Have a great day ahead, {user?.firstName} {user?.lastName}</h5>
                     <button className="border border-white w-70 h-10 rounded-sm mt-3 mb-3" onClick={() => (redirectToLogin())}>Close</button>
                 </div>

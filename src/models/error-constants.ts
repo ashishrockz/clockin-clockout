@@ -24,3 +24,13 @@ export enum ClockOutErrors {
     ERROR_EMPLOYEE_NOT_CLOCKED_IN = "error_employee_not_clocked_in",
     ERROR_CANNOT_CLOCK_OUT_EMPLOYEE = "error_cannot_clock_out_employee"
 }
+
+export enum UserDetailsErrors {
+    ERROR_EMPLOYEE_ATTENDANCE_DETAILS_NOT_FOUND = "error_employee_attendance_details_not_found",
+    ERROR_INVALID_EMPLOYEE = "error_invalid_employee"
+}
+
+export enum DisplayingUserDetailsErrors {
+    ERROR_EMPLOYEE_ATTENDANCE_DETAILS_NOT_FOUND = "Attendance details not found.",
+    ERROR_INVALID_EMPLOYEE = "Invalid employee information."
+}

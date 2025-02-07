@@ -39,7 +39,7 @@ const ClockIn: React.FC = () => {
                         setError(DisplayingUserDetailsErrors?.ERROR_EMPLOYEE_ATTENDANCE_DETAILS_NOT_FOUND);
                         break;
                     case UserDetailsErrors?.ERROR_INVALID_EMPLOYEE:
-                        setError(DisplayingClockInError?.ERROR_INVALID_EMPLOYEE);
+                        setError(DisplayingUserDetailsErrors?.ERROR_INVALID_EMPLOYEE);
                         break;
                     default:
                         setError(DisplayingClockInError?.SOMETHING_WENT_WRONG);

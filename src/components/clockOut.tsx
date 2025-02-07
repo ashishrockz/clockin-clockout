@@ -24,30 +24,32 @@ const ClockOut: React.FC = () => {
 
   const handelClockOut = async () => {
     try {
-      const response = await clockOut(user?.userId);
-      if (response?.success) {
-        setClockOutResponse(true);
-        setSnackbarOpen(false);
-        setError("");
-      } else {
-        let errorMessage;
-        switch (response?.message) {
-          case ClockOutError?.ERROR_INVALID_EMPLOYEE:
-            errorMessage = DisplayingClockOutError?.ERROR_INVALID_EMPLOYEE;
-            break;
-          case ClockOutError?.ERROR_EMPLOYEE_NOT_CLOCKED_IN:
-            errorMessage =
-              DisplayingClockOutError?.ERROR_EMPLOYEE_NOT_CLOCKED_IN;
-            break;
-          case ClockOutError?.ERROR_CANNOT_CLOCK_OUT_EMPLOYEE:
-            errorMessage =
-              DisplayingClockOutError?.ERROR_CANNOT_CLOCK_OUT_EMPLOYEE;
-            break;
-          default:
-            errorMessage = DisplayingClockOutError?.SOMETHING_WENT_WRONG;
-            break;
+      if(user?.userId){
+        const response = await clockOut(user?.userId);
+        if (response?.success) {
+          setClockOutResponse(true);
+          setSnackbarOpen(false);
+          setError("");
+        } else {
+          let errorMessage;
+          switch (response?.message) {
+            case ClockOutError?.ERROR_INVALID_EMPLOYEE:
+              errorMessage = DisplayingClockOutError?.ERROR_INVALID_EMPLOYEE;
+              break;
+            case ClockOutError?.ERROR_EMPLOYEE_NOT_CLOCKED_IN:
+              errorMessage =
+                DisplayingClockOutError?.ERROR_EMPLOYEE_NOT_CLOCKED_IN;
+              break;
+            case ClockOutError?.ERROR_CANNOT_CLOCK_OUT_EMPLOYEE:
+              errorMessage =
+                DisplayingClockOutError?.ERROR_CANNOT_CLOCK_OUT_EMPLOYEE;
+              break;
+            default:
+              errorMessage = DisplayingClockOutError?.SOMETHING_WENT_WRONG;
+              break;
+          }
+          handleError(errorMessage);
         }
-        handleError(errorMessage);
       }
     } catch (error: any) {
       console.error("Clock out failed:", error);
@@ -106,7 +108,7 @@ const ClockOut: React.FC = () => {
 
           <button
             onClick={handelClockOut}
-            className="w-full max-w-md bg-transparent border-2 border-orange-500 text-orange-500 py-3 rounded flex items-center justify-center space-x-2 hover:bg-orange-500 hover:text-white transition-colors"
+            className="w-full max-w-md bg-transparent py-3 rounded flex items-center justify-center space-x-2 bg-orange-500 hover:text-white transition-colors"
           >
             <Timer className="w-5 h-5" />
             <span>Clock-out</span>

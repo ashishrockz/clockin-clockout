@@ -1,19 +1,5 @@
 import { useState, useEffect } from "react";
-export const getFormattedTime = (date: Date) => {
-  return date.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  }).toLowerCase();
-};
-
-export const getFormattedDate = (date: Date) => {
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-};
-
+import { getFormattedDate, getFormattedTime } from "../global/customDateFormat";
 
 const DateTime: React.FC = () =>{
      const [currentDate, setCurrentDate] = useState<Date>(new Date());

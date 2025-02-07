@@ -11,13 +11,3 @@ export const urlConstants : UrlConstants = {
     clockIn:"clock-in",
     details:"details"
 }
-
-export interface UserStatus{
-  clockedIn:string;
-  clockedOut:string
-}
-
-export const userStatus:UserStatus = {
-  clockedIn : "clocked_in",
-  clockedOut : "clocked_out"
-}

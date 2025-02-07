@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import DateTime, { getFormattedTime } from "./datetime";
 import { useAuth } from "../context/AuthContext";
 import Snackbar from '@mui/material/Snackbar';
 import { useNavigate } from "react-router-dom";
@@ -7,8 +6,10 @@ import { logout } from "../data-providers/login-service";
 import { ClockInErrors, DisplayingClockInError, DisplayingUserDetailsErrors, UserDetailsErrors } from "../models/error-constants";
 import React from "react";
 import Button from '@mui/material/Button';
-import { clockIn, getUserClockDetails } from "../data-providers/clockin";
+import { clockIn, getUserDetailsById } from "../data-providers/clockin";
 import { EmployeeAttendance } from "../models/clockin-models";
+import { getFormattedTime } from "../global/customDateFormat";
+import DateTime from "./datetime";
 
 const ClockIn: React.FC = () => {
     const [clockInResponse, setClockInResponse] = useState<boolean>(false);
@@ -16,22 +17,15 @@ const ClockIn: React.FC = () => {
     const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
     const navigate = useNavigate();
     const { user } = useAuth();
-    let userDetails: EmployeeAttendance | undefined;
+    // let userDetails: EmployeeAttendance | undefined;
+    const [userDetails, setUserDetails] = useState<EmployeeAttendance | undefined>({"id":"32235da5-7dcc-4dc0-a698-89daed0e7629","clockIn":new Date("2025-02-07T05:28:08.224Z"),"clockOut":undefined,"totalHours":null,"status":"clocked_in","employeeCode":"EMP2","employeeId":"bfd21a74-d75c-4285-bf0d-a4a9479c95d6","employeeFirstName":"Jane","employeeLastName":"Smith","employeeFullName":"Jane Smith","date":new Date("2025-02-07")})
 
-
-    useEffect(() => {
-        if (snackbarOpen) {
-            setTimeout(() => {
-                setSnackbarOpen(false)
-            }, 6000)
-        }
-    }, [snackbarOpen]);
-
-    const getClockInDetails = async () =>{
+    const getUserDetails = async () =>{
         if((user?.userId)){
-            const response = await getUserClockDetails(user?.userId);
+            const response = await getUserDetailsById(user?.userId);
             if(response?.success){
-                userDetails = response.userData;
+                setUserDetails(response.userData);
+                // userDetails = response.userData;
             }
             else{
                 switch(response.message){
@@ -51,9 +45,7 @@ const ClockIn: React.FC = () => {
     }
 
     useEffect(()=>{
-        if(clockInResponse){
-            getClockInDetails();
-        }
+        getUserDetails();
     },[clockInResponse])
 
     const handleClockIn = async () => {
@@ -91,6 +83,11 @@ const ClockIn: React.FC = () => {
             navigate("/login")
         }
     }
+    // if(userDetails?.clockIn == UserStatus.clockedIn){
+    //     return(
+    //         <ClockOut/>
+    //     )
+    // }
 
     if (clockInResponse) {
         return (
@@ -98,7 +95,7 @@ const ClockIn: React.FC = () => {
                 <DateTime />
                 <div className="mt-15 flex flex-col justify-center items-center">
                 <h2 className="font-semibold text-xl mt-3 mb-3">
-                    Clocked-in successfully at {userDetails?.clockIn ? getFormattedTime(new Date(userDetails.clockIn)) : "N/A"}
+                    Clocked-in successfully at {userDetails?.clockIn ? getFormattedTime(userDetails.clockIn) : "N/A"}
                 </h2>
                     <h5 className="font-semibold text-lg mt-3 mb-3">Have a great day ahead, {userDetails?.employeeFullName}</h5>
                     <button className="border border-white w-70 h-10 rounded-sm mt-3 mb-3" onClick={() => (redirectToLogin())}>Close</button>
@@ -118,8 +115,7 @@ const ClockIn: React.FC = () => {
                 size="small"
                 onClick={handleClose}
                 sx={{
-                    backgroundColor: 'orange',
-                    color: 'white',
+                    color: 'orange',
                 }}
             >
                 Ok

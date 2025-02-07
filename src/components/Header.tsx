@@ -1,6 +1,5 @@
-import React from "react";
 
-const header = () => {
+const Header = () => {
   return (
     <header className="sticky top-0  bg-[#1a1f36] p-6 w-full border-white border-b-1 ">
       <div className="container mx-auto flex items-center justify-center">
@@ -10,5 +9,5 @@ const header = () => {
   );
 };
 
-export default header;
+export default Header;
   

@@ -1,64 +1,143 @@
 import { useEffect, useState } from "react";
 import DateTime from "./datetime";
 import { useAuth } from "../context/AuthContext";
+import Snackbar from '@mui/material/Snackbar';
+import { useNavigate } from "react-router-dom";
+import { logout } from "../data-providers/login-service";
+import { ClockInErrors, DisplayingClockInError } from "../models/error-constants";
+import React from "react";
+import Button from '@mui/material/Button';
 import { clockIn } from "../data-providers/clockin";
 
 const ClockIn: React.FC = () => {
-    const [apiResponse, setApiResponse] = useState<boolean>(false);
+    const [clockInResponse, setClockInResponse] = useState<boolean>(false);
+    const [error, setError] = useState<string>("");
+    const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
+    const navigate = useNavigate();
 
     const { user } = useAuth();
 
-    const submit = async () => {
-        const apiResponse = await clockIn(user?.userId)
-        if (apiResponse.success) {
-            setApiResponse(true);
+    useEffect(() => {
+        if (snackbarOpen) {
+            setTimeout(() => {
+                setSnackbarOpen(false)
+            }, 6000)
+        }
+    }, [snackbarOpen])
+
+    // useEffect(()=>{
+
+    // },[])
+
+    const handleClockIn = async () => {
+        if (!user?.userId) {
+            setError(DisplayingClockInError?.SOMETHING_WENT_WRONG);
+            setSnackbarOpen(true);
+            return;
+        }
+    
+        const apiResponse = await clockIn(user.userId);
+        if (apiResponse?.success) {
+            setClockInResponse(true);
+        } else {
+            switch (apiResponse?.message) {
+                case ClockInErrors?.ERROR_INVALID_EMPLOYEE:
+                    setError(DisplayingClockInError?.ERROR_INVALID_EMPLOYEE);
+                    break;
+                case ClockInErrors?.ERROR_EMPLOYEE_ALREADY_CLOCKED_IN:
+                    setError(DisplayingClockInError?.ERROR_EMPLOYEE_ALREADY_CLOCKED_IN);
+                    break;
+                case ClockInErrors?.ERROR_CANNOT_CLOCK_IN_EMPLOYEE:
+                    setError(DisplayingClockInError?.ERROR_CANNOT_CLOCK_IN_EMPLOYEE);
+                    break;
+                default:
+                    setError(DisplayingClockInError?.SOMETHING_WENT_WRONG);
+                    break;
+            }
+            setSnackbarOpen(true);
+        }
+    };
+
+    const redirectToLogin = async () => {
+        const response = await logout();
+        if (response?.success) {
+            navigate("/login")
         }
     }
 
-    if (apiResponse) {
+    if (clockInResponse) {
         return (
             <div className="bg-gray-900 text-white h-screen p-5">
                 <DateTime />
-                <div className="mt-15">
+                <div className="mt-15 flex flex-col justify-center items-center">
                     <h2 className="font-semibold text-xl mt-3 mb-3">Clocked-in successfully at 2:27</h2>
                     <h5 className="font-semibold text-lg mt-3 mb-3">Have a great day ahead, {user?.firstName} {user?.lastName}</h5>
-                    <button className="border border-white w-70 h-10 rounded-sm mt-3 mb-3">Close</button>
+                    <button className="border border-white w-70 h-10 rounded-sm mt-3 mb-3" onClick={() => (redirectToLogin())}>Close</button>
                 </div>
             </div>
         )
     }
 
+    const handleClose = () => {
+        setSnackbarOpen(false);
+        setError("");
+    };
+
+    const action = (
+        <React.Fragment>
+            <Button
+                size="small"
+                onClick={handleClose}
+                sx={{
+                    backgroundColor: 'blue',
+                    color: 'white',
+                }}
+            >
+                Ok
+            </Button>
+        </React.Fragment>
+    );
+
     return (
         <div className="bg-gray-900 text-white h-screen p-5">
             <DateTime />
-            <div className="mt-15">
+            <div className="mt-15 flex flex-col justify-center items-center">
                 <h3 className="font-bold text-3xl mt-3 mb-3">Welcome, {user?.firstName} {user?.lastName}</h3>
                 <h4 className="font-medium text-lg mt-3 mb-3">Please Clock-in to start your shift</h4>
-                <button 
-  onClick={() => setApiResponse(true)} 
-  className="bg-orange-500 w-100 h-10 rounded-sm mt-3 mb-3"
->
-<div className="flex items-center justify-center">
-<svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="20" 
-    height="20" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
-    className="lucide lucide-timer"
-  >
-    <line x1="10" x2="14" y1="2" y2="2"/>
-    <line x1="12" x2="15" y1="14" y2="11"/>
-    <circle cx="12" cy="14" r="8"/>
-  </svg>
-  <p className="ml-5">Clock-in</p>
-</div>
-</button>
+                <button
+                    onClick={() => handleClockIn()}
+                    className="bg-orange-500 w-100 h-10 rounded-sm mt-3 mb-3"
+                >
+                    <div className="flex items-center justify-center">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="lucide lucide-timer"
+                        >
+                            <line x1="10" x2="14" y1="2" y2="2" />
+                            <line x1="12" x2="15" y1="14" y2="11" />
+                            <circle cx="12" cy="14" r="8" />
+                        </svg>
+                        <p className="ml-3">Clock-in</p>
+                    </div>
+                </button>
                 <p>Cancel</p>
+                {snackbarOpen && <Snackbar
+                    open={snackbarOpen}
+                    autoHideDuration={6000}
+                    onClose={handleClose}
+                    message={error}
+                    action={action}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                />
+                }
             </div>
         </div>
     );

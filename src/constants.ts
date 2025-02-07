@@ -20,5 +20,4 @@ export interface UserStatus{
 export const userStatus:UserStatus = {
   clockedIn : "clocked_in",
   clockedOut : "clocked_out"
-
 }

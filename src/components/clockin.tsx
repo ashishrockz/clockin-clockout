@@ -9,7 +9,6 @@ import React from "react";
 import Button from '@mui/material/Button';
 import { clockIn, getUserClockDetails } from "../data-providers/clockin";
 import { EmployeeAttendance } from "../models/clockin-models";
-import { userStatus } from "../constants";
 
 const ClockIn: React.FC = () => {
     const [clockInResponse, setClockInResponse] = useState<boolean>(false);
@@ -17,7 +16,7 @@ const ClockIn: React.FC = () => {
     const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
     const navigate = useNavigate();
     const { user } = useAuth();
-    let userObject: EmployeeAttendance | undefined;
+    let userDetails: EmployeeAttendance | undefined;
 
 
     useEffect(() => {
@@ -26,13 +25,13 @@ const ClockIn: React.FC = () => {
                 setSnackbarOpen(false)
             }, 6000)
         }
-    }, [snackbarOpen])
+    }, [snackbarOpen]);
 
     const getClockInDetails = async () =>{
         if((user?.userId)){
             const response = await getUserClockDetails(user?.userId);
             if(response?.success){
-                userObject = response.userData;
+                userDetails = response.userData;
             }
             else{
                 switch(response.message){
@@ -52,8 +51,10 @@ const ClockIn: React.FC = () => {
     }
 
     useEffect(()=>{
-        getClockInDetails();
-    },[])
+        if(clockInResponse){
+            getClockInDetails();
+        }
+    },[clockInResponse])
 
     const handleClockIn = async () => {
         if (!user?.userId) {
@@ -90,13 +91,16 @@ const ClockIn: React.FC = () => {
             navigate("/login")
         }
     }
-    if (userObject?.status == userStatus.clockedIn) {
+
+    if (clockInResponse) {
         return (
             <div className="bg-gray-900 text-white h-screen p-5">
                 <DateTime />
                 <div className="mt-15 flex flex-col justify-center items-center">
-                    <h2 className="font-semibold text-xl mt-3 mb-3">Clocked-in successfully at {getFormattedTime(new Date(userObject.clockIn))}</h2>
-                    <h5 className="font-semibold text-lg mt-3 mb-3">Have a great day ahead, {user?.firstName} {user?.lastName}</h5>
+                <h2 className="font-semibold text-xl mt-3 mb-3">
+                    Clocked-in successfully at {userDetails?.clockIn ? getFormattedTime(new Date(userDetails.clockIn)) : "N/A"}
+                </h2>
+                    <h5 className="font-semibold text-lg mt-3 mb-3">Have a great day ahead, {userDetails?.employeeFullName}</h5>
                     <button className="border border-white w-70 h-10 rounded-sm mt-3 mb-3" onClick={() => (redirectToLogin())}>Close</button>
                 </div>
             </div>
@@ -114,7 +118,7 @@ const ClockIn: React.FC = () => {
                 size="small"
                 onClick={handleClose}
                 sx={{
-                    backgroundColor: 'blue',
+                    backgroundColor: 'orange',
                     color: 'white',
                 }}
             >

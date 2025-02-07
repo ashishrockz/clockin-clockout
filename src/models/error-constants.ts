@@ -29,3 +29,13 @@ export enum DisplayingClockInError {
     ERROR_CANNOT_CLOCK_IN_EMPLOYEE = "We are currently unable to clock you in.",
     SOMETHING_WENT_WRONG = "Something went wrong. Please try again."
 }
+
+export enum UserDetailsErrors {
+    ERROR_EMPLOYEE_ATTENDANCE_DETAILS_NOT_FOUND = "error_employee_attendance_details_not_found",
+    ERROR_INVALID_EMPLOYEE = "error_invalid_employee"
+}
+
+export enum DisplayingUserDetailsErrors {
+    ERROR_EMPLOYEE_ATTENDANCE_DETAILS_NOT_FOUND = "Attendance details not found.",
+    ERROR_INVALID_EMPLOYEE = "Invalid employee information."
+}

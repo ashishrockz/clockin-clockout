@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { clockOut } from "../data-providers/clock-out";
 import DateTime from "./datetime";
 import { useAuth } from "../context/AuthContext";
 import { logout } from "../data-providers/login-service";
 import { useNavigate } from "react-router-dom";
-import { Timer, AlertCircle } from "lucide-react";
+import { Timer, AlertCircle, Loader2 } from "lucide-react";
 import {
   ClockOutError,
   DisplayingClockOutError,
@@ -14,6 +14,7 @@ const ClockOut: React.FC = () => {
   const [clockOutResponse, setClockOutResponse] = useState<boolean>(false);
   const [error, setError] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -23,6 +24,7 @@ const ClockOut: React.FC = () => {
   };
 
   const handelClockOut = async () => {
+    setIsLoading(true);
     try {
       if(user?.userId){
         const response = await clockOut(user?.userId);
@@ -37,12 +39,10 @@ const ClockOut: React.FC = () => {
               errorMessage = DisplayingClockOutError?.ERROR_INVALID_EMPLOYEE;
               break;
             case ClockOutError?.ERROR_EMPLOYEE_NOT_CLOCKED_IN:
-              errorMessage =
-                DisplayingClockOutError?.ERROR_EMPLOYEE_NOT_CLOCKED_IN;
+              errorMessage = DisplayingClockOutError?.ERROR_EMPLOYEE_NOT_CLOCKED_IN;
               break;
             case ClockOutError?.ERROR_CANNOT_CLOCK_OUT_EMPLOYEE:
-              errorMessage =
-                DisplayingClockOutError?.ERROR_CANNOT_CLOCK_OUT_EMPLOYEE;
+              errorMessage = DisplayingClockOutError?.ERROR_CANNOT_CLOCK_OUT_EMPLOYEE;
               break;
             default:
               errorMessage = DisplayingClockOutError?.SOMETHING_WENT_WRONG;
@@ -54,10 +54,13 @@ const ClockOut: React.FC = () => {
     } catch (error: any) {
       console.error("Clock out failed:", error);
       handleError(ClockOutError?.SOMETHING_WENT_WRONG);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const redirectToLogin = async () => {
+    setIsLoading(true);
     try {
       const response = await logout();
       if (response.success) {
@@ -67,8 +70,18 @@ const ClockOut: React.FC = () => {
       }
     } catch (error) {
       handleError(ClockOutError?.SOMETHING_WENT_WRONG);
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="bg-gray-900 text-white h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-900 text-white h-screen p-5">
@@ -87,6 +100,7 @@ const ClockOut: React.FC = () => {
           <button
             className="w-full max-w-md bg-[#2C3648] text-white py-3 rounded hover:bg-[#3A4460] transition-colors flex items-center justify-center space-x-2"
             onClick={redirectToLogin}
+            disabled={isLoading}
           >
             <span>Close</span>
           </button>
@@ -95,8 +109,7 @@ const ClockOut: React.FC = () => {
         <div className="mt-15 flex flex-col items-center space-y-4">
           <p className="text-lg">Your shift began at 02:05 PM.</p>
           <p className="text-gray-300">
-            {user?.firstName} {user?.lastName}, kindly clock out to end your
-            shift.
+            {user?.firstName} {user?.lastName}, kindly clock out to end your shift.
           </p>
 
           {snackbarOpen && (
@@ -108,7 +121,8 @@ const ClockOut: React.FC = () => {
 
           <button
             onClick={handelClockOut}
-            className="w-full max-w-md bg-transparent py-3 rounded flex items-center justify-center space-x-2 bg-orange-500 hover:text-white transition-colors"
+            className="w-full max-w-md bg-orange-500 py-3 rounded flex items-center justify-center space-x-2 hover:bg-orange-600 transition-colors disabled:opacity-50"
+            disabled={isLoading}
           >
             <Timer className="w-5 h-5" />
             <span>Clock-out</span>
@@ -117,6 +131,7 @@ const ClockOut: React.FC = () => {
           <button
             className="text-gray-400 hover:text-white transition-colors flex items-center space-x-2"
             onClick={redirectToLogin}
+            disabled={isLoading}
           >
             <span>Cancel</span>
           </button>

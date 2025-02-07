@@ -1,19 +1,20 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Delete } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { login } from "../data-providers/login-service";
 import { LoginErrors } from "../models/error-constants";
 import { useNavigate } from "react-router-dom";
+import { IconButton, Snackbar } from "@mui/material";
 
 const EmployeeLogin = () => {
   const { setUser} = useAuth();
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState('');
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
   const [pin, setPin] = useState<string>("");
 
-  const handelSubmit = async () => {
+  const handleSubmit = async () => {
     try {
       const response = await login(pin);
       if(response?.success && response?.userData){
@@ -29,22 +30,23 @@ const EmployeeLogin = () => {
         }
           
       } 
-     } catch(e) {
+     } catch(e: any) {
       setErrorMessage(LoginErrors.OOPS_SOMETHING_WENR_WRONG);
      } finally {
-      setLoading(false);
+      // setLoading(false);
      }
     }
 
-
-  const handleNumberClick = (loginPin: string) => {
-    if (pin.length < 4) {
-      setPin((prev) => prev + loginPin);
-    } 
-    if(pin.length === 4) {
-      handelSubmit();
-    }
-   };
+    useEffect(() => {
+      if (pin.length === 4) {
+        handleSubmit();
+      }
+    }, [pin]);
+    
+    const handleNumberClick = (loginPin: string) => {
+      setPin((prev) => (prev.length < 4 ? prev + loginPin : prev));
+    };
+    
 
   const handleClear = () => {
     setPin("");
@@ -62,6 +64,23 @@ const EmployeeLogin = () => {
       {content}
     </button>
   );
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false); 
+};
+
+const action = (
+  <React.Fragment>
+    <IconButton
+      size="small"
+      aria-label="close"
+      color="inherit"
+      onClick={handleCloseSnackbar}
+    >
+     OK
+    </IconButton>
+  </React.Fragment>
+);
 
   return (
     <div
@@ -94,6 +113,21 @@ const EmployeeLogin = () => {
           )}
         </div>
       </div>
+      <Snackbar
+                  open={openSnackbar}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                message = {errorMessage}
+                action={action}
+                sx={{
+                    '& .MuiSnackbarContent-root': {
+                      minWidth: '200px',
+                      minHeight: '30px',
+                      fontSize: '14px',
+                    }
+                  }}                
+           />
     </div>
   );
 };

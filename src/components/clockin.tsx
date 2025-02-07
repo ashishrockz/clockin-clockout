@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import DateTime from "./datetime";
 import { useAuth } from "../context/AuthContext";
 import { clockIn } from "../data-providers/clockin";
